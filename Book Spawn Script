@@ -1,0 +1,254 @@
+//ChaosBookSpawnScript.itemScript
+//This is the script used for randomly spawning books at altars.
+
+INIT
+
+ITEM:__Me
+FLOAT:%BaseChance
+INT:%Finished
+
+//Amount of these skills in party from lower iterate check
+INT:%AgeNum = 0
+INT:%DashNum = 0
+INT:%DisplacementNum = 0
+INT:%FluxNum = 0
+INT:%LagNum = 0
+INT:%MarNum = 0
+INT:%ReturnNum = 0
+INT:%RuinNum = 0
+INT:%SearNum = 0
+INT:%SnatchNum = 0
+INT:%WarpNum = 0
+
+EVENTS
+
+EVENT BookRandomSpawn
+VARS
+	CHARACTER:_Character
+ON
+	OnUseItem(_Character, __Me)
+ACTIONS
+	Set(%AgeNum, 0)
+	Set(%DashNum, 0)
+	Set(%DisplacementNum, 0)
+	Set(%FluxNum, 0)
+	Set(%LagNum, 0)
+	Set(%MarNum, 0)
+	Set(%ReturnNum, 0)
+	Set(%RuinNum, 0)
+	Set(%SearNum, 0)
+	Set(%SnatchNum, 0)
+	Set(%WarpNum, 0)
+
+	IterateParty("SkillNumberIterateCheck") //check how many of each skill the party has
+
+	Set(%Finished, 0)
+	Set(%BaseChance, .09090909)
+
+	IF "c1&c2&c3&c4&c5&c6&c7&c8&c8&c9&c10&c11" //If every member of the party already has all skiills
+		IsEqual(%AgeNum, 4)
+		IsEqual(%DashNum, 4)
+		IsEqual(%DisplacementNum, 4)
+		IsEqual(%FluxNum, 4)
+		IsEqual(%LagNum, 4)
+		IsEqual(%MarNum, 4)
+		IsEqual(%RuinNum, 4)
+		IsEqual(%SearNum, 4)
+		IsEqual(%SnatchNum, 4)
+		IsEqual(%AgeNum, 4)
+		IsEqual(%WarpNum, 4)
+	THEN //if all members have all skills, allow them to recieve books regardless
+		Set(%AgeNum, 0)
+		Set(%DashNum, 0)
+		Set(%DisplacementNum, 0)
+		Set(%FluxNum, 0)
+		Set(%LagNum, 0)
+		Set(%MarNum, 0)
+		Set(%ReturnNum, 0)
+		Set(%RuinNum, 0)
+		Set(%SearNum, 0)
+		Set(%SnatchNum, 0)
+		Set(%WarpNum, 0)
+	ENDIF
+		
+WHILE "c1"
+	IsEqual(%Finished, 0)
+DO
+	IF "c1&!c2"
+		IsRandom(.087) //slightly lower chance
+		IsEqual(%RuinNum, 4)
+	THEN
+		PlayEffectAt(__Me, "RS3_FX_GP_Impacts_ChaoticRuin_01")
+		CharacterAddToInventory(_Character, "SKILLBOOK_Fire_ChaoticRuin", 1)
+		Set(%Finished, 1)
+		ItemDestroy(__Me)
+
+	ELIF "c1&!c2"
+		IsRandom(.088) //slightly lower chance
+		IsEqual(%FluxNum, 4)
+	THEN
+		PlayEffectAt(__Me, "RS3_FX_GP_Impacts_ChaoticRuin_01")
+		CharacterAddToInventory(_Character, "SKILLBOOK_Air_ChaoticFlux", 1)
+		Set(%Finished, 1)
+		ItemDestroy(__Me)
+
+	ELIF "c1&!c2"
+		IsRandom(.089) //slightly lower chance
+		IsEqual(%WarpNum, 4)
+	THEN
+		PlayEffectAt(__Me, "RS3_FX_GP_Impacts_ChaoticRuin_01")
+		CharacterAddToInventory(_Character, "SKILLBOOK_Air_ChaoticWarp", 1)
+		Set(%Finished, 1)
+		ItemDestroy(__Me)
+
+	ELIF "c1&!c2"
+		IsRandom(.09) //slightly lower chance
+		IsEqual(%ReturnNum, 4)
+	THEN
+		PlayEffectAt(__Me, "RS3_FX_GP_Impacts_ChaoticRuin_01")
+		CharacterAddToInventory(_Character, "SKILLBOOK_Earth_ChaoticReturn", 1)
+		Set(%Finished, 1)
+		ItemDestroy(__Me)
+
+	ELIF "c1&!c2"
+		IsRandom(%BaseChance)
+		IsEqual(%MarNum, 4)
+	THEN
+		PlayEffectAt(__Me, "RS3_FX_GP_Impacts_ChaoticRuin_01")
+		CharacterAddToInventory(_Character, "SKILLBOOK_Fire_ChaoticMar", 1)
+		Set(%Finished, 1)
+		ItemDestroy(__Me)
+
+	ELIF "c1&!c2"
+		IsRandom(%BaseChance)
+		IsEqual(%DisplacementNum, 4)
+	THEN
+		PlayEffectAt(__Me, "RS3_FX_GP_Impacts_ChaoticRuin_01")
+		CharacterAddToInventory(_Character, "SKILLBOOK_Air_ChaoticDisplacement", 1)
+		Set(%Finished, 1)
+		ItemDestroy(__Me)
+
+	ELIF "c1&!c2"
+		IsRandom(.09) //slightly lower chance
+		IsEqual(%SearNum, 4)
+	THEN
+		PlayEffectAt(__Me, "RS3_FX_GP_Impacts_ChaoticRuin_01")
+		CharacterAddToInventory(_Character, "SKILLBOOK_Fire_ChaoticSear", 1)
+		Set(%Finished, 1)
+		ItemDestroy(__Me)
+
+	ELIF "c1&!c2"
+		IsRandom(%BaseChance)
+		IsEqual(%AgeNum, 4)
+	THEN
+		PlayEffectAt(__Me, "RS3_FX_GP_Impacts_ChaoticRuin_01")
+		CharacterAddToInventory(_Character, "SKILLBOOK_Necro_ChaoticAge", 1)
+		Set(%Finished, 1)
+		ItemDestroy(__Me)
+
+	ELIF "c1&!c2"
+		IsRandom(%BaseChance)
+		IsEqual(%LagNum, 4)
+	THEN
+		PlayEffectAt(__Me, "RS3_FX_GP_Impacts_ChaoticRuin_01")
+		CharacterAddToInventory(_Character, "SKILLBOOK_Necro_ChaoticLag", 1)
+		Set(%Finished, 1)
+		ItemDestroy(__Me)
+		
+	ELIF "c1&!c2"
+		IsRandom(%BaseChance)
+		IsEqual(%SnatchNum, 4)
+	THEN
+		PlayEffectAt(__Me, "RS3_FX_GP_Impacts_ChaoticRuin_01")
+		CharacterAddToInventory(_Character, "SKILLBOOK_Poly_ChaoticSnatch", 1)
+		Set(%Finished, 1)
+		ItemDestroy(__Me)
+		
+	ELIF "c1&!c2"
+		IsRandom(.092) //slightly higher chance
+		IsEqual(%DashNum, 4)
+	THEN
+		PlayEffectAt(__Me, "RS3_FX_GP_Impacts_ChaoticRuin_01")
+		CharacterAddToInventory(_Character, "SKILLBOOK_Rouge_ChaoticDash", 1)
+		Set(%Finished, 1)
+		ItemDestroy(__Me)
+		
+	ENDIF
+
+ENDWHILE
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
+EVENT IteratePartySkillCount
+VARS
+	CHARACTER:_Character
+ON
+	OnIterateCharacter(_Character, "SkillNumberIterateCheck")
+ACTIONS
+	IF "c1"
+		CharacterHasSkill(_Character, ProjectileStrike_ChaoticDisplacement)
+	THEN
+		Add(%DisplacementNum, 1)
+	ENDIF
+
+	IF "c1"
+		CharacterHasSkill(_Character, Projectile_ChaoticRuin)
+	THEN
+		Add(%RuinNum, 1)
+	ENDIF
+
+	IF "c1"
+		CharacterHasSkill(_Character, Target_ChaoticLag)
+	THEN
+		Add(%LagNum, 1)
+	ENDIF
+	
+	IF "c1"
+		CharacterHasSkill(_Character, Target_ChaoticSnatch)
+	THEN
+		Add(%SnatchNum, 1)
+	ENDIF
+	
+	IF "c1"
+		CharacterHasSkill(_Character, Projectile_ChaoticAge)
+	THEN
+		Add(%AgeNum, 1)
+	ENDIF
+	
+	IF "c1"
+		CharacterHasSkill(_Character, Target_ChaoticReturn)
+	THEN
+		Add(%ReturnNum, 1)
+	ENDIF
+	
+	IF "c1"
+		CharacterHasSkill(_Character, ProjectileStrike_ChaoticSear)
+	THEN
+		Add(%SearNum, 1)
+	ENDIF	
+
+	IF "c1"
+		CharacterHasSkill(_Character, Target_ChaoticMar)
+	THEN
+		Add(%MarNum, 1)
+	ENDIF	
+	
+	IF "c1"
+		CharacterHasSkill(_Character, Target_ChaoticFlux)
+	THEN
+		Add(%FluxNum, 1)
+	ENDIF	
+	
+	IF "c1"
+		CharacterHasSkill(_Character, Rush_ChaoticDash)
+	THEN
+		Add(%DashNum, 1)
+	ENDIF	
+	
+	IF "c1"
+		CharacterHasSkill(_Character, Target_ChaoticWarp)
+	THEN
+		Add(%WarpNum, 1)
+	ENDIF	
+
+
+//SpawnItem(d0546a75-fbd2-4e4c-bf37-3c6d8fec8c33, _ItemPos, _ItemOut)   .09090909
