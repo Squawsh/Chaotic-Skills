@@ -1,0 +1,925 @@
+//ChaosScripts.gameScript
+//These are the main scripts for v1.1.0
+
+INIT
+
+	//CHARACTER:__Me
+	INT:%SnatchedCounter //For Area Snatch Scripts
+	
+	FLOAT3:%LaggedTurnStartPos //For Backlash Script
+	FLOAT3:%BacklashTurnStartPos //For Lag Script
+	
+	FLOAT3:%MarTargetPos //For Mar Script
+	CHARACTER:%MarTarget //For Mar Script
+	
+	CHARACTER:%SearCaster //For Sear Script, Ice Spawn On Move
+	
+
+EVENTS
+
+
+//////////////////////////////////////////////SNATCHER//////////////////////////////////////////////////////////////////////////////////////////////
+EVENT CharacterSetSnatcher
+VARS
+	CHARACTER:_Target
+	CHARACTER:_Caster
+ON
+	OnCharacterStatusApplied(_Target, SNATCH_ENEMY)
+ACTIONS
+IF "c1&c2"
+	CharacterHasStatus(_Target, SNATCH_ENEMY)
+	CharacterGetStatusSourceCharacter(_Target, SNATCH_ENEMY, _Caster)
+THEN
+	CharacterApplyStatus(_Caster, SNATCH_SELF)
+ENDIF
+
+//////////////////////////////////////////////SNATCHED AND SNATCHER AREA EFFECT//////////////////////////////////////////////////////////////////////////////////////////////
+EVENT SnatchedAreaSteal
+VARS
+	CHARACTER:_Character
+	ITEM:_Item
+	FLOAT3:_Pos
+	FLOAT:_LevelFloat
+	INT:_Test
+	FIXEDSTRING:_STest
+ON
+	OnTurn(_Character, _Item)
+ACTIONS
+IF "(c1|c2)&c3&c4"
+	CharacterHasStatus(_Character, SNATCH_ENEMY)
+	CharacterHasStatus(_Character, SNATCH_SELF)
+	IsInCombat(_Character)
+	GetPosition(_Character, _Pos)
+THEN
+	Set(%SnatchedCounter, INT:0)
+	IterateCharactersNear(_Character, FLOAT:6.0, "SetSnatchAreaIterator")
+	IF "c1&c2"
+		IsEqual(%SnatchedCounter, INT:0)
+		CharacterHasStatus(_Character, SNATCH_SELF)
+	THEN
+		CharacterApplyStatus(_Character, SNATCH_SELF_AREA_0)
+		CharacterRemoveStatus(_Character, SNATCH_SELF)
+
+	ELIF "c1"
+		IsEqual(%SnatchedCounter, INT:1)
+	THEN
+		CharacterApplyStatus(_Character, SNATCH_SELF_AREA_1)
+
+	ELIF "c1"
+		IsEqual(%SnatchedCounter, INT:2)
+	THEN
+		CharacterApplyStatus(_Character, SNATCH_SELF_AREA_2)
+
+	ELIF "c1"
+		IsEqual(%SnatchedCounter, INT:3)
+	THEN
+		CharacterApplyStatus(_Character, SNATCH_SELF_AREA_3)
+
+	ELIF "c1"
+		IsEqual(%SnatchedCounter, INT:4)
+	THEN
+		CharacterApplyStatus(_Character, SNATCH_SELF_AREA_4)
+
+	ELIF "c1"
+		IsEqual(%SnatchedCounter, INT:5)
+	THEN
+		CharacterApplyStatus(_Character, SNATCH_SELF_AREA_5)
+
+	ELIF "c1"
+		IsEqual(%SnatchedCounter, INT:6)
+	THEN
+		CharacterApplyStatus(_Character, SNATCH_SELF_AREA_6)
+
+	ELIF "c1"
+		IsEqual(%SnatchedCounter, INT:7)
+	THEN
+		CharacterApplyStatus(_Character, SNATCH_SELF_AREA_7)
+
+	ELIF "c1"
+		IsGreaterThen(%SnatchedCounter, INT:7)
+	THEN
+		CharacterApplyStatus(_Character, SNATCH_SELF_AREA_8)
+	ENDIF
+	
+	//PlayEffectAt(_Character, "RS3_FX_Skills_Totem_Cast_Target_Totem_Shadow_Root_01")
+	PlayEffectAt(_Character, "RS3_FX_Skills_ChaoticSnatcherAOE_Cast")
+	Set(%SnatchedCounter, INT:0)
+		
+ENDIF
+
+//////////////////////////////////////////////SNATCHER AREA EFFECT ITERATOR//////////////////////////////////////////////////////////////////////////////////////////////
+EVENT SnatchedAreaStealIteratorEvent
+VARS
+	CHARACTER:_Character
+	CHARACTER:_Caster
+	INT:_CharCount
+	FLOAT:_Test
+	FLOAT3:_DummyOut
+	FLOAT3:_Pos
+ON
+	OnIterateCharacter(_Character, "SetSnatchAreaIterator")
+ACTIONS
+IF "!c1&!c2&!c3"
+	CharacterHasStatus(_Character, SNATCH_ENEMY)
+	CharacterHasStatus(_Character, SNATCH_SELF)
+	CharacterIsDead(_Character)
+THEN
+	CharacterApplyStatus(_Character, SNATCH_ENEMY_AREA) //give area debuff
+ENDIF
+
+IF "c1"
+	CharacterHasStatus(_Character, SNATCH_ENEMY_AREA) //if debuff applied...
+THEN
+	Add(%SnatchedCounter, INT:1)
+	PlayEffectAt(_Character, "RS3_FX_Skills_ChaoticSnatchedAOE_Cast")
+	//PlayEffectAt(_Character, "RS3_FX_GP_ScriptedEvent_Ambushers_Smoke_01")
+ENDIF
+//////////////////////////////////////////////WARPER AURA//////////////////////////////////////////////////////////////////////////////////////////////
+EVENT CharacterSetWarperAura
+VARS
+	CHARACTER:_Target
+	CHARACTER:_Caster
+ON
+	OnCharacterStatusApplied(_Target, WARPED_AURA)
+ACTIONS
+IF "c1&c2"
+	CharacterHasStatus(_Target, WARPED_AURA)
+	CharacterGetStatusSourceCharacter(_Target, WARPED_AURA, _Caster)
+THEN
+	CharacterApplyStatus(_Caster, WARPER_AURA)
+ENDIF
+
+
+//////////////////////////////////////////////////DISPLACEMENT//////////////////////////////////////////////////////////////////////////////////////////
+EVENT DisplacementPositionSwap
+VARS
+	CHARACTER:_Target
+	CHARACTER:_Caster
+	FLOAT3:_CasterPos
+	FLOAT3:_TargetPos
+	ITEM:_Item
+ON
+	OnTurnEnded(_Target,_Item)
+ACTIONS
+IF "c1&c2&c3&c4&c5"
+	CharacterHasStatus(_Target, DISPLACEMENT)
+	CharacterGetStatusSourceCharacter(_Target, DISPLACEMENT, _Caster)
+	CharacterHasStatus(_Caster, DISPLACEMENT)
+	//GetClosestPlayer()
+	GetPosition(_Target, _TargetPos)
+	GetPosition(_Caster, _CasterPos)
+THEN
+	PlayEffectAt(_Target, "RS3_FX_GP_Status_DisplacedTeleport_01")
+	PlayEffectAt(_Caster, "RS3_FX_GP_Status_DisplacedTeleport_01")
+	TeleportTo(_Caster,_TargetPos,0)
+	TeleportTo(_Target,_CasterPos,0)
+	PlayEffectAt(_Target, "RS3_FX_GP_Status_DisplacedTeleport_01")
+	PlayEffectAt(_Caster, "RS3_FX_GP_Status_DisplacedTeleport_01")
+ENDIF
+
+//////////////////////////////////////////////DISPLACEMENT CASTER APPLY//////////////////////////////////////////////////////////////////////////////////////////////
+EVENT CasterSetDisplacement
+VARS
+	CHARACTER:_Target
+	CHARACTER:_Caster
+ON
+	OnSkillCast(_Caster, ProjectileStrike_ChaoticDisplacement)
+ACTIONS
+IF "c1"
+	CharacterHasSkill(_Caster, ProjectileStrike_ChaoticDisplacement)
+THEN
+	CharacterApplyStatus(_Caster, DISPLACEMENT, 2)
+	CharacterApplyStatus(_Caster, WIND_WALKER, 2)
+ENDIF
+
+
+//////////////////////////////////////////////////AGED VENGEFUL SPIRIT//////////////////////////////////////////////////////////////////////////////////////////
+EVENT AgedSpawnVengefulSpirit
+VARS
+	CHARACTER:_Target
+	CHARACTER:_Caster
+	CHARACTER:_Spirit
+	CHARACTERTEMPLATE:_TargetTemplate
+	FLOAT3:_Pos
+	FLOAT:_LevelF
+	INT:_Level
+	FIXEDSTRING:_FactionTarget
+	FIXEDSTRING:_FactionCaster
+ON
+	OnCharacterStatusApplied(_Target, DYING)
+ACTIONS
+IF "c1&c2&c3&c4&c5&c6&!c7&c8&!c9&!c10"
+	CharacterHasStatus(_Target, AGED)
+	CharacterGetStatusSourceCharacter(_Target, AGED, _Caster)
+	GetPosition(_Target, _Pos)
+	CharacterGetStat(_LevelF, _Target, Level)
+	GetFaction(_FactionTarget, _Target)
+	GetFaction(_FactionCaster, _Caster)
+	IsEqual(_FactionTarget, _FactionCaster)
+	CharacterGetTemplate(_Target, _TargetTemplate)
+	CharacterIsPlayer(_Target)
+	CharacterHasStatus(_Target, VENGEFULSPIRIT)
+	
+THEN
+	Cast(_Level, _LevelF)
+	SpawnCharacter(_Spirit, b7e013cf-a979-4851-b88f-7d0bafd6a382, _Pos, 1, 1, _Target, _Level)
+	//SpawnCharacter(_Spirit, db0439c6-84ae-4160-b776-c36e5fec77e4, _Pos, 1, 1, _Target, _Level)
+	//SetTag(_Spirit, "Enemy")
+	//SetFaction(_Spirit, _FactionTarget)
+	CharacterSetRelationIndivToIndiv(_Spirit, _Caster, 0)
+	//CharacterSetTemporaryHostileRelation(_Caster, _Spirit)
+	CharacterApplyStatus(_Spirit, VENGEFULSPIRIT)
+ENDIF
+
+
+//////////////////////////////////////////////VENGEFUL SPIRIT DEATH//////////////////////////////////////////////////////////////////////////////////////////////
+EVENT VengefulSpiritDeath
+VARS
+	CHARACTER:_Target
+ON
+	OnCharacterStatusApplied(_Target, DYING)
+ACTIONS
+IF "c1"
+	CharacterHasStatus(_Target, VENGEFULSPIRIT)
+THEN
+	PlayEffectAt(_Target, "RS3_FX_GP_ScriptedEvent_Ambushers_Smoke_01")
+	CharacterDestroy(_Target)
+ENDIF
+
+
+//////////////////////////////////////////////SEARING TARGET SURFACE - ICE ON APPLICATION//////////////////////////////////////////////////////////////////////////////////////////////
+EVENT SearingSurfaceCreation
+VARS
+	CHARACTER:_Target
+	CHARACTER:_Caster
+	FLOAT3:_TargetPos
+ON
+	OnCharacterStatusApplied(_Target, SEARING)
+ACTIONS
+IF "c1&c2&c3"
+	CharacterHasStatus(_Target, SEARING)
+	CharacterGetStatusSourceCharacter(_Target, SEARING, _Caster)
+	GetPosition(_Target, _TargetPos)
+THEN
+	CreateSurfaceAt(_TargetPos,SurfaceWaterFrozen,3,3,_Caster)
+ENDIF
+
+//////////////////////////////////////////////SEARING CASTER SURFACE - FIRE ON APPLICATION//////////////////////////////////////////////////////////////////////////////////////////////
+EVENT SearingCasterSurfaceCreation
+VARS
+	//CHARACTER:_Target
+	CHARACTER:_Caster
+	FLOAT3:_CasterPos
+ON
+	OnCharacterStatusApplied(_Caster, DICHOTOMIZED)
+ACTIONS
+IF "c1&c2"
+	CharacterHasStatus(_Caster, DICHOTOMIZED)
+	//CharacterGetStatusSourceCharacter(_Target, SEARING, _Caster)
+	GetPosition(_Caster, _CasterPos)
+THEN
+	CreateSurfaceAt(_CasterPos,SurfaceFire,3,3,_Caster)
+ENDIF
+
+
+//////////////////////////////////////////////SEARING TARGET BLEED STEAM//////////////////////////////////////////////////////////////////////////////////////////////
+EVENT SearingBleedSteam
+VARS
+	CHARACTER:_Target
+	CHARACTER:_Caster
+	FLOAT3:_TargetPos
+ON
+	OnCharacterStatusApplied(_Target, HIT)
+ACTIONS
+IF "c1&c2&c3"
+	CharacterHasStatus(_Target, SEARING)
+	CharacterGetStatusSourceCharacter(_Target, SEARING, _Caster)
+	GetPosition(_Target, _TargetPos)
+THEN
+	CreateSurfaceAt(_TargetPos,SurfaceWaterCloud,2,1,_Caster)
+ENDIF
+
+
+//////////////////////////////////////////////WARPED ON TURN EVENT//////////////////////////////////////////////////////////////////////////////////////////////
+EVENT WarpedOnTurnStatus
+VARS
+	CHARACTER:_Caster
+	CHARACTER:_Target
+	ITEM: _Item
+ON
+	OnTurn(_Target, _Item)
+ACTIONS
+IF "(c1|c2|c3|c4)&c5&c6"
+	CharacterHasStatus(_Target, WARPED)
+	CharacterHasStatus(_Target, WARPED_AURA)
+	CharacterHasStatus(_Target, WARPER)
+	CharacterHasStatus(_Target, WARPER_AURA)
+	IsInCombat(_Target)
+	IsRandom(.5)
+THEN
+	CharacterRemoveStatus(_Target, CAUTIOUS)
+	CharacterApplyStatus(_Target, RECKLESS)
+	
+ELIF "(c1|c2|c3|c4)&c5"
+	CharacterHasStatus(_Target, WARPED)
+	CharacterHasStatus(_Target, WARPED_AURA)
+	CharacterHasStatus(_Target, WARPER)
+	CharacterHasStatus(_Target, WARPER_AURA)
+	IsInCombat(_Target)
+THEN
+	CharacterRemoveStatus(_Target, RECKLESS)
+	CharacterApplyStatus(_Target, CAUTIOUS)
+
+//ELIF "c1&c2"
+	//CharacterHasStatus(_Target, RETURNING)
+//	IsRandom(.25)
+//THEN
+	//CharacterApplyStatus(_Target, SEARING)
+	
+ENDIF
+
+
+//////////////////////////////////////////////RETURN ATTACK EVENT, REPRISAL STATUS//////////////////////////////////////////////////////////////////////////////////////////////
+EVENT ReturnOnAttackStatus
+VARS
+	CHARACTER:_AttackerOwner
+	CHARACTER:_Attacker
+	CHARACTER:_Defender
+	ITEM:_DefItem
+ON
+	//OnDamage(Physical, _, _Attacker, _)
+	OnCharacterStartAttackObject(_Defender,_DefItem,_AttackerOwner,_Attacker)
+ACTIONS
+IF "c1&!c2"
+	CharacterHasStatus(_Defender, RETURNING)
+	CharacterHasStatus(_Attacker, REPRISAL)
+	//IsInCombat(_Attacker)
+THEN
+	CharacterApplyStatus(_Attacker, REPRISAL, 2)
+ENDIF
+
+
+//////////////////////////////////////////////RETURN REPRISAL SPAWN SURFACE//////////////////////////////////////////////////////////////////////////////////////////////
+EVENT ReprisalSpawnSurfaces
+VARS
+	CHARACTER:_Attacker
+	ITEM:_DummyItem
+	FLOAT3:_AttackerPos
+ON
+	OnTurn(_Attacker, _DummyItem)
+ACTIONS
+IF "c1&c2&c3"
+	CharacterHasStatus(_Attacker, REPRISAL)
+	IsRandom(.2)
+	GetPosition(_Attacker, _AttackerPos)
+THEN
+	CreateSurfaceAt(_AttackerPos,SurfaceFire,2,2,_Attacker)
+
+ELIF "c1&c2&c3"
+	CharacterHasStatus(_Attacker, REPRISAL)
+	IsRandom(.2)
+	GetPosition(_Attacker, _AttackerPos)
+THEN
+	CreateSurfaceAt(_AttackerPos,SurfaceWater,2,2,_Attacker)
+
+ELIF "c1&c2&c3"
+	CharacterHasStatus(_Attacker, REPRISAL)
+	IsRandom(.2)
+	GetPosition(_Attacker, _AttackerPos)
+THEN
+	CreateSurfaceAt(_AttackerPos,SurfaceWeb,2,2,_Attacker)
+	
+ELIF "c1&c2&c3"
+	CharacterHasStatus(_Attacker, REPRISAL)
+	IsRandom(.2)
+	GetPosition(_Attacker, _AttackerPos)
+THEN
+	CreateSurfaceAt(_AttackerPos,SurfacePoison,2,2,_Attacker)
+
+ELIF "c1&c2"
+	CharacterHasStatus(_Attacker, REPRISAL)
+	GetPosition(_Attacker, _AttackerPos)
+THEN
+	CreateSurfaceAt(_AttackerPos,SurfaceOil,2,2,_Attacker)
+ENDIF
+
+
+//////////////////////////////////////////////RUIN CASTER DEBUFFS//////////////////////////////////////////////////////////////////////////////////////////////
+EVENT RuinCasterDebuffs
+VARS
+	CHARACTER:_Caster
+ON
+	OnSkillCast(_Caster, Projectile_ChaoticRuin)
+ACTIONS
+IF "c1"
+	IsRandom(.15)
+THEN
+	CharacterApplyStatus(_Caster, SUFFOCATING, 1)
+ENDIF
+
+IF "c1"
+	IsRandom(.15)
+THEN
+	CharacterApplyStatus(_Caster, ACID, 1)
+ENDIF
+	
+IF "c1"
+	IsRandom(.15)
+THEN
+	CharacterApplyStatus(_Caster, POISONED, 1)
+ENDIF
+	
+IF "c1"
+	IsRandom(.15)
+THEN
+	CharacterApplyStatus(_Caster, BURNING, 1)
+ENDIF
+	
+IF "c1"
+	IsRandom(.15)
+THEN
+	CharacterApplyStatus(_Caster, MUTED, 1)
+ENDIF
+	
+IF "c1"
+	IsRandom(.15)
+THEN
+	CharacterApplyStatus(_Caster, BLIND, 1)
+ENDIF
+
+IF "c1"
+	IsRandom(.15)
+THEN
+	CharacterApplyStatus(_Caster, FEAR, 1)
+ENDIF
+
+IF "c1"
+	IsRandom(.15)
+THEN
+	CharacterApplyStatus(_Caster, SLOWED, 1)
+ENDIF
+
+IF "c1"
+	IsRandom(.15)
+THEN
+	CharacterApplyStatus(_Caster, CURSED, 1)
+ENDIF
+
+IF "c1"
+	IsRandom(.15)
+THEN
+	CharacterApplyStatus(_Caster, STUNNED, 1)
+ENDIF
+
+IF "c1"
+	IsRandom(.15)
+THEN
+	CharacterApplyStatus(_Caster, WEAK, 1)
+ENDIF
+
+
+//////////////////////////////////////////////LAG TELEPORT TURN START//////////////////////////////////////////////////////////////////////////////////////////////
+EVENT LagTeleportStart
+VARS
+	CHARACTER:_Target
+	ITEM:_Dummy
+ON
+	OnTurn(_Target, _Dummy)
+	OnCharacterStatusApplied(_Target, LAGGED)
+ACTIONS
+IF "c1"
+	CharacterHasStatus(_Target, LAGGED)
+THEN
+	GetPosition(_Target, %LaggedTurnStartPos)
+ENDIF
+
+//////////////////////////////////////////////BACKLASH TELEPORT TURN START//////////////////////////////////////////////////////////////////////////////////////////////
+EVENT BacklashTeleportStart
+VARS
+	CHARACTER:_Target
+	ITEM:_Dummy
+ON
+	OnTurn(_Target, _Dummy)
+	OnCharacterStatusApplied(_Target, BACKLASH)
+ACTIONS
+IF "c1"
+	CharacterHasStatus(_Target, BACKLASH)
+THEN
+	GetPosition(_Target, %BacklashTurnStartPos)
+ENDIF
+
+//////////////////////////////////////////////LAG TELEPORT TURN END//////////////////////////////////////////////////////////////////////////////////////////////
+EVENT LagTeleportEnd
+VARS
+	CHARACTER:_Target
+	ITEM:_Dummy
+ON
+	OnTurnEnded(_Target, _Dummy)
+ACTIONS
+IF "c1"
+	CharacterHasStatus(_Target, LAGGED)
+THEN
+	PlayEffectAt(_Target, "RS3_FX_GP_Status_LaggedTeleport_01")
+	TeleportTo(_Target, %LaggedTurnStartPos, 0)
+	PlayEffectAt(_Target, "RS3_FX_GP_Status_LaggedTeleport_01")
+	//SetVar(% MIGHT NEED TO SET POSITION TO NULL
+ENDIF
+
+
+//////////////////////////////////////////////BACKLASH TELEPORT TURN END//////////////////////////////////////////////////////////////////////////////////////////////
+EVENT BacklashTeleportEnd
+VARS
+	CHARACTER:_Target
+	ITEM:_Dummy
+ON
+	OnTurnEnded(_Target, _Dummy)
+ACTIONS
+IF "c1&c2"
+	CharacterHasStatus(_Target, BACKLASH)
+	IsRandom(.50)
+THEN
+	PlayEffectAt(_Target, "RS3_FX_GP_Status_LaggedTeleport_01")
+	TeleportTo(_Target, %BacklashTurnStartPos, 0)
+	PlayEffectAt(_Target, "RS3_FX_GP_Status_LaggedTeleport_01")
+	//SetVar(% MIGHT NEED TO SET POSITION TO NULL
+ENDIF
+
+
+//////////////////////////////////////////////MAR TURN EFFECTS//////////////////////////////////////////////////////////////////////////////////////////////
+EVENT MarTurnEffects
+VARS
+	CHARACTER:_Target //%MarTarget
+	ITEM:_Dummy
+ON
+	OnTurn(_Target, _Dummy)
+ACTIONS
+IF "c1&c2"
+	CharacterHasStatus(_Target, MAR)
+	GetPosition(_Target, %MarTargetPos)
+THEN
+	Set(%MarTarget, _Target)
+	PlayEffectAt(_Target, "RS3_FX_GP_Impacts_ChaoticMar_Terror_01") //TO BE CHANGED
+	IterateCharactersNear(_Target, FLOAT:5.0, "MarSightIterator")
+	//PlayEffectAt(_Target, "RS3_FX_GP_ScriptedEvent_Ambushers_Smoke_01")
+ENDIF
+
+
+//////////////////////////////////////////////MAR SIGHT EFFECT ITERATOR//////////////////////////////////////////////////////////////////////////////////////////////
+EVENT MarCharacterSightEffect
+VARS
+	CHARACTER:_Character
+ON
+	OnIterateCharacter(_Character, "MarSightIterator")
+ACTIONS
+IF "!c1&c2"
+	CharacterIsDead(_Character)
+	//CharacterCanSee(_Character, %MarTarget, INT:1)
+	IsFacing(_Character, %MarTarget, INT:45)
+THEN
+	CharacterApplyStatus(_Character, FEAR, 1, 0, %MarTarget)
+	//PlayEffectAt(_Character, "RS3_FX_GP_ScriptedEvent_Ambushers_Smoke_01")
+ENDIF
+
+
+//////////////////////////////////////////////DASH CONTRITION DAMAGE//////////////////////////////////////////////////////////////////////////////////////////////
+EVENT CharacterContritionDamage
+VARS
+	CHARACTER:_Target
+	FLOAT:_Health
+	//FIXEDSTRING:_HealthString
+	//FLOAT:_NewHealth
+ON
+	OnSkillCast(_Target,_)
+ACTIONS
+IF "c1&c2"
+	CharacterHasStatus(_Target, CONTRITION)
+	CharacterGetStat(_Health, _Target, Vitality)
+THEN
+	Subtract(_Health, FLOAT:0.05)
+	SetHealth(_Target, _Health)
+	IterateCharactersNear(_Target, FLOAT:2.0, "SpreadContritionIterator")
+ENDIF
+
+
+//////////////////////////////////////////////DASH CONTRITION ITERATOR EVENT//////////////////////////////////////////////////////////////////////////////////////////////
+EVENT SpreadContritionIteratorEvent
+VARS
+	CHARACTER:_Character
+ON
+	OnIterateCharacter(_Character, "SpreadContritionIterator")
+ACTIONS
+IF "!c1&!c2"
+	CharacterHasStatus(_Character, CONTRITION)
+	CharacterIsDead(_Character)
+THEN
+	CharacterApplyStatus(_Character, CONTRITION, 1)
+	PlayEffectAt(_Character, "RS3_FX_Skills_ChaoticDash_Prepare_Root_01")
+ENDIF
+
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////OLD CODE / BROKEN CODE / TEST CODE / REFERENCE CODE/////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/*
+//////////////////////////////////////////////TRADE ABILITY OLD//////////////////////////////////////////////////////////////////////////////////////////////
+EVENT CharacterTradeAbility
+VARS
+	CHARACTER:_Character
+	ITEM:_Item
+ON
+	//OnActivate()
+	OnUseItem(_Character, _Item)
+ACTIONS
+IF "c1"
+	CharacterHasSkill(_Character, ProjectileStrike_ChaoticDisplacement)
+	//CharacterGetStatusSourceCharacter(_Target, SNATCH_ENEMY, _Caster)
+THEN
+	CharacterAddToInventory(_Character, "BOOK_Skill_Air_ChaoticDisplacement", 1, 1)
+ENDIF
+
+//////////////////////////////////////////////CHAR COUNT TEST//////////////////////////////////////////////////////////////////////////////////////////////
+EVENT CharCountTest
+VARS
+	CHARACTER:_Character
+	//CHARACTER:_Caster
+	INT:_CharCount
+	FLOAT:_Test
+	//FLOAT3:_DummyOut
+	FLOAT3:_Pos
+ON
+	OnCharacterStatusApplied(_Character, HASTED)
+ACTIONS
+IF "c1&c2" //Remove aoe snatched debuff from caster/castee of Snatch from earlier projectile
+	//CharacterGetSkillImpactRange(_Test, _Character, ProjectileStrike_ChaoticDisplacement)
+	GetPosition(_Character, _Pos)
+	//CharacterCount(_CharCount, _Pos, 40.0, null, null, null, null, null)
+	//CharacterGetHostileCount(_CharCount,_Character)
+THEN
+	CharacterApplyStatus(_Character, RESTED)
+	PlayEffectAt(_Character, "RS3_FX_GP_ScriptedEvent_Ambushers_Smoke_01")
+	PlayEffectAt(_Character, "RS3_FX_GP_ScriptedEvent_Ambushers_Smoke_01")
+	PlayEffectAt(_Character, "RS3_FX_GP_ScriptedEvent_Ambushers_Smoke_01")
+ENDIF
+
+//////////////////////////////////////////////FLUX FIX //////////////////////////////////////////////////////////////////////////////////////////////
+EVENT CharacterRemoveFluxxxx
+VARS
+	CHARACTER:_Target
+	ITEM:_Item
+ON
+	OnTurn(_Target, _Item)
+ACTIONS
+IF "c1"
+	CharacterHasStatus(_Target, FLUX_END)
+THEN
+	CharacterRemoveStatus(_Target, FLUX)
+ENDIF
+
+//////////////////////////////////////////////FLUX REAPPLY FIX - OLD//////////////////////////////////////////////////////////////////////////////////////////////
+EVENT FluxReapplyFix
+VARS
+	CHARACTER:_Target
+	CHARACTER:_Caster
+ON
+	OnCharacterStatusApplied(_Target, FLUX)
+ACTIONS
+IF "c1&c2"
+	CharacterHasStatus(_Target, FLUX)
+	//CharacterGetStatusSourceCharacter(_Target, FLUX, _Caster)
+THEN
+	//CharacterApplyStatus(_Caster, SNATCH_SELF)
+ENDIF
+
+
+//////////////////////////////////////////////SEARING ON ATTACK EVENT//////////////////////////////////////////////////////////////////////////////////////////////
+EVENT SearingAttackEffect
+VARS
+	CHARACTER:_Caster
+	CHARACTER:_Target
+	ITEM: _Dummy
+ON
+	OnTurnEnded(_Target, _Dummy)
+ACTIONS
+IF "c1&c2"
+	CharacterHasStatus(_Target, SEARING)
+	CharacterGetStatusSourceCharacter(_Target, SEARING, _Caster)
+THEN
+	CharacterApplyStatus(_Caster, SEARING)
+ENDIF
+
+
+
+///////////////////////////////////////////////////AGED/RENEWAL/////////////////////////////////////////////////////////////////////////////////////////
+EVENT AgedRenewal
+VARS
+	CHARACTER:_Target
+	CHARACTER:_Caster
+ON
+	//OnCharacterStatusRemoved(_Target, AGED)
+ACTIONS
+IF "c1"
+    CharacterGetStatusSourceCharacter(_Target, AGED, _Caster)
+THEN
+	CharacterApplyStatus(_Target, HASTED, 2, 0, _Caster)
+ENDIF
+
+//////////////////////////////////////////////////OLD : DISPLACEMENT//////////////////////////////////////////////////////////////////////////////////////////
+EVENT DisplacementPositionSwap
+VARS
+	CHARACTER:_Target
+	CHARACTER:_Caster
+	FLOAT3:_CasterPos
+	FLOAT3:_TargetPos
+ON
+	OnCharacterStatusApplied(_Target, WIND_WALKER)
+ACTIONS
+IF "c1&c2&c3&c4"
+	CharacterHasStatus(_Target, DISPLACEMENT)
+	CharacterGetStatusSourceCharacter(_Target, DISPLACEMENT, _Caster)
+	GetPosition(_Target, _TargetPos)
+	GetPosition(_Caster, _CasterPos)
+THEN
+	CharacterApplyStatus(_Caster,DISPLACEMENT)
+	TeleportTo(_Caster,_TargetPos,0)
+	TeleportTo(_Target,_CasterPos,0)
+ENDIF
+
+
+//////////////////////////////////////////////REFERENCE MATERIAL//////////////////////////////////////////////////////////////////////////////////////////////
+// (god bless)
+EVENT MyMod_OnDying_SpawnDogs
+VARS
+	CHARACTER:_Target
+	CHARACTER:_Caster
+	CHARACTER:_Dog1
+	CHARACTER:_Dog2
+	CHARACTER:_Dog3
+	FLOAT3:_Pos
+	FLOAT:_LevelF
+	INT:_Level
+	FIXEDSTRING:_Faction
+ON
+	OnCharacterStatusApplied(_Target, DYING)
+ACTIONS
+IF "c1&c2&c3&c4&c5"
+	CharacterHasStatus(_Target, HASTED)
+	CharacterGetStatusSourceCharacter(_Target, HASTED, _Caster)
+	GetPosition(_Target, _Pos)
+	CharacterGetStat(_LevelF, _Caster, Level)
+	GetFaction(_Faction, _Caster)
+THEN
+	//FLOAT to INT
+	Cast(_Level, _LevelF)
+	SpawnCharacter(_Dog1, Animals_Dog_B_Black_ad8f1f47-3bb9-4d51-aadf-aed3b264530c, _Pos, 1, 0, _Caster, _Level)
+	SpawnCharacter(_Dog2, Animals_Dog_A_Black_e0467912-f900-48ab-b677-28d14a515846, _Pos, 1, 0, _Caster, _Level)
+	SpawnCharacter(_Dog3, Animals_Dog_B_RedFaction_A_41d02eb7-01aa-436e-af61-86cf2ce671f6, _Pos, 1, 0, _Caster, _Level)
+	SetFaction(_Dog1, _Faction)
+	SetFaction(_Dog2, _Faction)
+	SetFaction(_Dog3, _Faction)
+	CharacterApplyStatus(_Caster, HASTED)
+ENDIF
+
+
+
+//////////////////////////////////////////////RETURN ATTACK EVENT ref//////////////////////////////////////////////////////////////////////////////////////////////
+EVENT ReturnOnAttack
+VARS
+	CHARACTER:_AttackerOwner
+	CHARACTER:_Attacker
+	CHARACTER:_Defender
+	CHARACTER:_Caster
+	ITEM:_DefItem
+ON
+	OnCharacterStartAttackObject(_Defender,_DefItem,_AttackerOwner,_Attacker)
+ACTIONS
+IF "c1&c2"
+	CharacterHasStatus(_Defender, RETURNING)
+	CharacterGetStatusSourceCharacter(_Defender, RETURNING, _Caster)
+THEN
+	CharacterApplyStatus(_Attacker, HASTED)
+ENDIF
+
+//////////////////////////////////////////////RETURN ATTACK EVENT SURFACE//////////////////////////////////////////////////////////////////////////////////////////////
+EVENT ReturnOnAttack
+VARS
+	CHARACTER:_AttackerOwner
+	CHARACTER:_Attacker
+	CHARACTER:_Defender
+	CHARACTER:_Caster
+	ITEM:_DefItem
+	FLOAT3:_AttackerPos
+ON
+	OnCharacterStartAttackObject(_Defender,_DefItem,_AttackerOwner,_Attacker)
+ACTIONS
+IF "c1&c2&c3"
+	CharacterHasStatus(_Defender, RETURNING)
+	//CharacterGetStatusSourceCharacter(_Defender, RETURNING, _Caster)
+	IsRandom(0)
+	GetPosition(_Attacker, _AttackerPos)
+THEN
+	CreateSurfaceAt(_AttackerPos,SurfaceFire,2,2,_Defender)
+
+ELIF "c1&c2&c3"
+	CharacterHasStatus(_Defender, RETURNING)
+	IsRandom(.2)
+	GetPosition(_Attacker, _AttackerPos)
+THEN
+	CreateSurfaceAt(_AttackerPos,SurfaceWater,2,2,_Defender)
+
+ELIF "c1&c2&c3"
+	CharacterHasStatus(_Defender, RETURNING)
+	IsRandom(.2)
+	GetPosition(_Attacker, _AttackerPos)
+THEN
+	CreateSurfaceAt(_AttackerPos,SurfaceBlood,2,2,_Defender)
+	
+ELIF "c1&c2&c3"
+	CharacterHasStatus(_Defender, RETURNING)
+	IsRandom(.2)
+	GetPosition(_Attacker, _AttackerPos)
+THEN
+	CreateSurfaceAt(_AttackerPos,SurfacePoison,2,2,_Defender)
+
+ELIF "c1&c2"
+	CharacterHasStatus(_Defender, RETURNING)
+	GetPosition(_Attacker, _AttackerPos)
+THEN
+	CreateSurfaceAt(_AttackerPos,SurfaceOil,2,2,_Defender)
+ENDIF
+
+//////////////////////////////////////////////SEARING CASTER SURFACE - OLD (ice upon application)//////////////////////////////////////////////////////////////////////////////////////////////
+EVENT SearingCasterSurfaceCreation
+VARS
+	//CHARACTER:_Target
+	CHARACTER:_Caster
+	FLOAT3:_CasterPos
+ON
+	OnCharacterStatusApplied(_Caster, DICHOTOMIZED)
+ACTIONS
+IF "c1&c2"
+	CharacterHasStatus(_Caster, DICHOTOMIZED)
+	//CharacterGetStatusSourceCharacter(_Target, SEARING, _Caster)
+	GetPosition(_Caster, _CasterPos)
+THEN
+	CreateSurfaceAt(_CasterPos,SurfaceWaterFrozen,3,3,_Caster)
+ENDIF
+
+//////////////////////////////////////////////SEARING CASTER SURFACE ON MOVE USING TIMER//////////////////////////////////////////////////////////////////////////////////////////////
+EVENT EndTimerDichotomizedIce //End Timer
+ON
+	OnDie(%SearCaster,_,_,_)
+	OnCharacterStatusRemoved(%SearCaster, DICHOTOMIZED)
+ACTIONS
+	StopTimer("Dichotomized_CreateSurface_Timer")
+
+
+EVENT StartTimerDichotomizedIce //Start Timer
+VARS
+	CHARACTER:_Caster
+ON
+	OnCharacterStatusApplied(_Caster, DICHOTOMIZED)
+ACTIONS
+IF "c1"
+	CharacterHasStatus(_Caster, DICHOTOMIZED)
+THEN
+	Set(%SearCaster,_Caster)
+	StartTimer("Dichotomized_CreateSurface_Timer",0.38,1)
+	CharacterApplyStatus(_Caster, HASTED, 1)
+	StopTimer("Dichotomized_CreateSurface_Timer")
+ENDIF
+
+EVENT OnTimerCreateIce //Create Ice on Timer
+VARS
+	CHARACTER:_Caster
+ON
+	OnTimer("Dichotomized_CreateSurface_Timer")
+ACTIONS
+IF "c1"
+	//IsInActiveTurn(%SearCaster)							
+	//IsInCombat(%SearCaster)								
+	CharacterHasStatus(%SearCaster, DICHOTOMIZED)
+THEN	
+	CreateSurfaceAt(%SearCaster, SurfaceWaterFrozen, .5, 1)
+	CharacterApplyStatus(%SearCaster, LAGGED, 1)
+ENDIF
+
+//////////////////////////////////////////////SEARING CASTER SURFACE - ICE ON APPLICATION//////////////////////////////////////////////////////////////////////////////////////////////
+EVENT SearingCasterSurfaceCreation
+VARS
+	//CHARACTER:_Target
+	CHARACTER:_Caster
+	FLOAT3:_CasterPos
+ON
+	OnCharacterStatusApplied(_Caster, DICHOTOMIZED)
+ACTIONS
+IF "c1&c2"
+	CharacterHasStatus(_Caster, DICHOTOMIZED)
+	//CharacterGetStatusSourceCharacter(_Target, SEARING, _Caster)
+	GetPosition(_Caster, _CasterPos)
+THEN
+	CreateSurfaceAt(_CasterPos,SurfaceWaterFrozen,3,3,_Caster)
+ENDIF
+
+
+*/
