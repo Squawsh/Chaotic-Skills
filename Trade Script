@@ -1,0 +1,105 @@
+//ChaosTradeScript.itemScript
+//This is the script used for trading known skills into their book form
+
+INIT
+
+ITEM:__Me
+
+EVENTS
+
+EVENT CharacterTradeAbility
+VARS
+	CHARACTER:_Character
+ON
+	OnUseItem(_Character, __Me)
+ACTIONS
+
+IF "c1"
+	CharacterHasSkill(_Character, ProjectileStrike_ChaoticDisplacement)
+THEN
+	PlayEffectAt(_Character, "RS3_FX_GP_ScriptedEvent_Ambushers_Smoke_01")
+	CharacterAddToInventory(_Character, "SKILLBOOK_Air_ChaoticDisplacement", 1, 1)
+	CharacterRemoveSkill(_Character, ProjectileStrike_ChaoticDisplacement)
+ENDIF
+
+IF "c1"
+	CharacterHasSkill(_Character, Projectile_ChaoticRuin)
+THEN
+	PlayEffectAt(_Character, "RS3_FX_GP_ScriptedEvent_Ambushers_Smoke_01")
+	CharacterAddToInventory(_Character, "SKILLBOOK_Fire_ChaoticRuin", 1, 1)
+	CharacterRemoveSkill(_Character, Projectile_ChaoticRuin)
+ENDIF
+
+IF "c1"
+	CharacterHasSkill(_Character, Target_ChaoticLag)
+THEN
+	PlayEffectAt(_Character, "RS3_FX_GP_ScriptedEvent_Ambushers_Smoke_01")
+	CharacterAddToInventory(_Character, "SKILLBOOK_Necro_ChaoticLag", 1, 1)
+	CharacterRemoveSkill(_Character, Target_ChaoticLag)
+ENDIF
+
+IF "c1"
+	CharacterHasSkill(_Character, Target_ChaoticSnatch)
+THEN
+	PlayEffectAt(_Character, "RS3_FX_GP_ScriptedEvent_Ambushers_Smoke_01")
+	CharacterAddToInventory(_Character, "SKILLBOOK_Poly_ChaoticSnatch", 1, 1)
+	CharacterRemoveSkill(_Character, Target_ChaoticSnatch)
+ENDIF
+
+IF "c1"
+	CharacterHasSkill(_Character, Projectile_ChaoticAge)
+THEN
+	PlayEffectAt(_Character, "RS3_FX_GP_ScriptedEvent_Ambushers_Smoke_01")
+	CharacterAddToInventory(_Character, "SKILLBOOK_Necro_ChaoticAge", 1, 1)
+	CharacterRemoveSkill(_Character, Projectile_ChaoticAge)
+ENDIF
+
+IF "c1"
+	CharacterHasSkill(_Character, Target_ChaoticReturn)
+THEN
+	PlayEffectAt(_Character, "RS3_FX_GP_ScriptedEvent_Ambushers_Smoke_01")
+	CharacterAddToInventory(_Character, "SKILLBOOK_Earth_ChaoticReturn", 1, 1)
+	CharacterRemoveSkill(_Character, Target_ChaoticReturn)
+ENDIF
+
+IF "c1"
+	CharacterHasSkill(_Character, ProjectileStrike_ChaoticSear)
+THEN
+	PlayEffectAt(_Character, "RS3_FX_GP_ScriptedEvent_Ambushers_Smoke_01")
+	CharacterAddToInventory(_Character, "SKILLBOOK_Fire_ChaoticSear", 1, 1)
+	CharacterRemoveSkill(_Character, ProjectileStrike_ChaoticSear)
+ENDIF
+
+IF "c1"
+	CharacterHasSkill(_Character, Target_ChaoticMar)
+THEN
+	PlayEffectAt(_Character, "RS3_FX_GP_ScriptedEvent_Ambushers_Smoke_01")
+	CharacterAddToInventory(_Character, "SKILLBOOK_Fire_ChaoticMar", 1, 1)
+	CharacterRemoveSkill(_Character, Target_ChaoticMar)
+ENDIF
+
+IF "c1"
+	CharacterHasSkill(_Character, Target_ChaoticFlux)
+THEN
+	PlayEffectAt(_Character, "RS3_FX_GP_ScriptedEvent_Ambushers_Smoke_01")
+	CharacterAddToInventory(_Character, "SKILLBOOK_Air_ChaoticFlux", 1, 1)
+	CharacterRemoveSkill(_Character, Target_ChaoticFlux)
+ENDIF
+
+IF "c1"
+	CharacterHasSkill(_Character, Rush_ChaoticDash)
+THEN
+	PlayEffectAt(_Character, "RS3_FX_GP_ScriptedEvent_Ambushers_Smoke_01")
+	CharacterAddToInventory(_Character, "SKILLBOOK_Rouge_ChaoticDash", 1, 1)
+	CharacterRemoveSkill(_Character, Rush_ChaoticDash)
+ENDIF
+
+IF "c1"
+	CharacterHasSkill(_Character, Target_ChaoticWarp)
+THEN
+	PlayEffectAt(_Character, "RS3_FX_GP_ScriptedEvent_Ambushers_Smoke_01")
+	CharacterAddToInventory(_Character, "SKILLBOOK_Air_ChaoticWarp", 1, 1)
+	CharacterRemoveSkill(_Character, Target_ChaoticWarp)
+ENDIF
+
+
